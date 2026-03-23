@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+.venv
+.venv/Lib/site-packages/81d243bd2c585b0f4821__mypyc.cp314-win_amd64.pyd
+data/*
+!data/.gitkeep
+!data/README.md
+data/**
+data/

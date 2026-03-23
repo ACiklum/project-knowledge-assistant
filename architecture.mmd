@@ -1,0 +1,71 @@
+%% Project Knowledge Assistant — System Architecture
+
+graph TD
+    subgraph UI_Layer["User Interface Layer"]
+        USER(("User"))
+        STREAMLIT["Streamlit UI<br/><i>ui/streamlit_app.py</i>"]
+    end
+
+    subgraph API_Layer["API Layer"]
+        FASTAPI["FastAPI Server<br/><i>api/api.py</i><br/>POST /ask"]
+    end
+
+    subgraph Agent_Graph["LangGraph Agent Pipeline"]
+        direction TB
+
+        REWRITER["Query Rewriter Node<br/><i>rewrite_query()</i><br/>Expands vague terms into<br/>domain-specific vocabulary"]
+
+        RETRIEVER["Retriever Node<br/><i>retrieve_docs()</i><br/>ReAct Agent picks<br/>registration_search, resubmission_search,<br/>or endpoints_search (one or more)"]
+
+        RESPONDER["Responder Node<br/><i>generate_answer()</i><br/>LLM generates answer<br/>from retrieved context"]
+
+        REFLECTOR{"Reflector Node<br/><i>reflect_on_answer()</i><br/>LLM scores answer 1-5 on<br/>Relevance · Groundedness · Completeness"}
+
+        PASS["Return Answer"]
+        RETRY["Retry with critique"]
+
+        REWRITER --> RETRIEVER
+        RETRIEVER --> RESPONDER
+        RESPONDER --> REFLECTOR
+        REFLECTOR -- "score >= 3" --> PASS
+        REFLECTOR -- "score < 3 AND<br/>retries remaining" --> RETRY
+        RETRY --> RETRIEVER
+    end
+
+    subgraph Data_Layer["Data & Retrieval Layer"]
+        direction TB
+        DOCS["Project Documents<br/><i>data/</i><br/>deal_registration_submission_sop.txt<br/>deal_resubmission_workflow.txt<br/>fannie_endpoints_developer_doc.txt"]
+        PROCESSOR["Document Processor<br/><i>document_processor.py</i><br/>Load · Section-aware chunking<br/>Tag topic metadata"]
+        FAISS["FAISS Vector Store<br/><i>vector_store.py</i><br/>OpenAI Embeddings<br/>Topic-filtered retrieval"]
+    end
+
+    subgraph Tools["RAG Tools"]
+        REG_TOOL["registration_search<br/>Deal registration &amp; submission docs"]
+        RESUB_TOOL["resubmission_search<br/>Resubmission workflow docs"]
+        ENDPOINTS_TOOL["endpoints_search<br/>API endpoint reference docs"]
+    end
+
+    subgraph Config_Layer["Configuration"]
+        CONFIG["Config<br/><i>src/config/config.py</i><br/>OpenAI API Key · LLM model<br/>Chunk size · Retriever K"]
+        ENV[".env<br/>OPENAI_API_KEY"]
+    end
+
+    USER -- "question" --> STREAMLIT
+    STREAMLIT -- "HTTP POST /ask<br/>or direct call" --> FASTAPI
+    FASTAPI --> REWRITER
+    PASS -- "answer + sources + reflection metadata" --> FASTAPI
+    FASTAPI -- "JSON response" --> STREAMLIT
+    STREAMLIT -- "answer + sources" --> USER
+
+    DOCS --> PROCESSOR
+    PROCESSOR --> FAISS
+    FAISS --> REG_TOOL
+    FAISS --> RESUB_TOOL
+    FAISS --> ENDPOINTS_TOOL
+    REG_TOOL --> RETRIEVER
+    RESUB_TOOL --> RETRIEVER
+    ENDPOINTS_TOOL --> RETRIEVER
+
+    ENV --> CONFIG
+    CONFIG --> FASTAPI
+    CONFIG --> FAISS
