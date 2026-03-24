@@ -105,19 +105,10 @@ Edit `src/config/config.py` to change:
 
 ## Demo questions
 
-**Deal registration workflow** (uses registration_search):
-- "What are the steps to register a new deal in Dealpath?"
-- "What happens after a deal is submitted to Fannie Mae?"
+What are the steps of deal resubmission ?
 
-**Resubmission workflow** (uses resubmission_search):
-- "What are the steps of deal resubmission?"
-- "What is the resubmission workflow and when can I resubmit a deal?"
+What are the steps of deal submission and resubmission? How both are different from each other?
 
-**API endpoints** (uses endpoints_search):
-- "Which API endpoints do I need to create a deal and add participants?"
-- "What are waiver endpoints and how do I submit a waiver?"
-- "I want loan endpoints and when we need to create loan?"
+What to do if I am facing issue while putting deal in draft state in resubmission flow?
 
-**Cross-topic questions** (uses multiple tools):
-- "How do I register a deal and what API endpoints should I call for registration?"
-- "What are the steps to submit a deal and which endpoint updates the deal status?"
+What are pre steps which I need for deal registeration? Please share all endpoints which I need for preregister steps.
